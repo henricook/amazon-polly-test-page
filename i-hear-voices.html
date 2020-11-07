@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Voice Tester</title>
+    <style type="text/css">
+        div.name {
+            width: 300px;
+            display: inline-block;
+        }
+
+        div.voicebox {
+            padding-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="textToSynth">
+        <h1>Voice tester</h1>
+        <div style="padding-bottom: 20px;">
+            <b>Status:</b> <span id="result"></span>
+        </div>
+        <div class="voicebox">
+            <div class="name">Amy (Female, British)</div>
+            <button class="btn default" onClick="speakText('Amy')">Synthesize</button>
+        </div>
+        <div class="voicebox">
+            <div class="name">Emma (Female, British)</div>
+            <button class="btn default" onClick="speakText('Emma')">Synthesize</button>
+        </div>
+        <div class="voicebox">
+            <div class="name">Brian (Male, British)</div>
+            <button class="btn default" onClick="speakText('Brian')">Synthesize</button>
+        </div>
+        <div style="padding-top: 20px;">
+
+        </div>
+        <div class="voicebox">
+            <div class="name">Salli (Female, US)</div>
+            <button class="btn default" onClick="speakText('Salli')">Synthesize</button>
+        </div>
+        <div class="voicebox">
+            <div class="name">Joanna, (Female, US)</div>
+            <button class="btn default" onClick="speakText('Joanna')">Synthesize</button>
+        </div>
+        <div class="voicebox">
+            <div class="name">Ivy (Female, US)</div>
+            <button class="btn default" onClick="speakText('Ivy')">Synthesize</button>
+            <-------- extra creepy
+        </div>
+        <div class="voicebox">
+            <div class="name">Kendra (Female, US)</div>
+            <button class="btn default" onClick="speakText('Kendra')">Synthesize</button>
+        </div>
+        <div class="voicebox">
+            <div class="name">Kimberly (Female, US)</div>
+            <button class="btn default" onClick="speakText('Kimberly')">Synthesize</button>
+        </div>
+        <div class="voicebox">
+            <div class="name">Matthew (Male, US)</div>
+            <button class="btn default" onClick="speakText('Matthew')">Synthesize</button>
+        </div>
+        <div class="voicebox">
+            <div class="name">Justin (Male, US)</div>
+            <button class="btn default" onClick="speakText('Justin')">Synthesize</button>
+        </div>
+        <div class="voicebox">
+            <div class="name">Joey (Male, US)</div>
+            <button class="btn default" onClick="speakText('Joey')">Synthesize</button>
+        </div>
+    </div>
+    <audio id="audioPlayback">
+        <source id="audioSource" type="audio/mp3" src="">
+    </audio>
+    <!-- (script elements go here) -->
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.787.0.min.js"></script>
+    <script type="text/javascript">
+
+        // Initialize the Amazon Cognito credentials provider
+        AWS.config.region = 'YOURREGIONHERE';
+        AWS.config.credentials = new AWS.CognitoIdentityCredentials({IdentityPoolId: 'YOURIDENTITYPOOLIDHERE'});
+
+        // Function invoked by button click
+        function speakText(voiceId) {
+            // Create the JSON parameters for getSynthesizeSpeechUrl
+            var speechParams = {
+                OutputFormat: "mp3",
+                SampleRate: "16000",
+                Text: "",
+                TextType: "text",
+                VoiceId: voiceId
+            };
+            speechParams.Text = "It's very good to meet you. I hope you're having a great day.";
+            // Create the Polly service object and presigner object
+            var polly = new AWS.Polly({apiVersion: '2016-06-10'});
+            var signer = new AWS.Polly.Presigner(speechParams, polly)
+
+            // Create presigned URL of synthesized speech file
+            signer.getSynthesizeSpeechUrl(speechParams, function(error, url) {
+                if (error) {
+                    document.getElementById('result').innerHTML = error;
+                } else {
+                    document.getElementById('audioSource').src = url;
+                    document.getElementById('audioPlayback').load();
+                    document.getElementById('result').innerHTML = "Playing the voice of " + voiceId + "...";
+                    document.getElementById("audioPlayback").play();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
